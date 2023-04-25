@@ -13,3 +13,4 @@ searches:
     bark: true
     maxLatencyMs: 1000
 ```
+TraceQL is currently used in testing
