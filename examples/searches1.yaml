@@ -1,0 +1,78 @@
+kind: Search
+metadata:
+  name: services-search
+spec:
+  searches:
+    - name: service1
+      code_rules:
+        - functions:
+            - getUsers
+            - updateUser
+      communication_rules:
+        - protocol: http
+          allowed_source_services:
+            - service2
+            - service3
+            - service4
+        - protocol: grpc
+          allowed_source_services:
+            - service2
+            - service3
+    - name: service2
+      code_rules:
+        - functions:
+            - getAllOrders
+            - updateOrderStatus
+      communication_rules:
+        - protocol: http
+          allowed_source_services:
+            - service1
+      repository_rules:
+        - type: mongodb
+          allowed_statements:
+            - find
+            - update
+          allowed_source_services:
+            - service3
+    - name: service3
+      code_rules:
+        - functions:
+            - authenticateUser
+            - registerUser
+      communication_rules:
+        - protocol: http
+          allowed_source_services:
+            - service1
+            - service2
+        - protocol: grpc
+          allowed_source_services:
+            - service4
+      repository_rules:
+        - type: mysql
+          allowed_statements:
+            - select
+            - insert
+            - update
+          allowed_source_services:
+            - service2
+    - name: service4
+      code_rules:
+        - functions:
+            - processPayment
+            - refundPayment
+      communication_rules:
+        - protocol: http
+          allowed_source_services:
+            - service1
+        - protocol: grpc
+          allowed_source_services:
+            - service2
+            - service3
+      repository_rules:
+        - type: postgresql
+          allowed_statements:
+            - select
+            - insert
+          allowed_source_services:
+            - service2
+            - service3

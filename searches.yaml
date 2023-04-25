@@ -1,0 +1,7 @@
+searches:
+  - serviceName: shop-backend
+    allowedMethods:
+      - GET
+      - POST
+    bark: true
+    maxLatencyMs: 1000

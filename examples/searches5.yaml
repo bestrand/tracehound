@@ -1,0 +1,129 @@
+# Example with childFunctions and topics
+kind: Search
+metadata:
+  name: services-search
+spec:
+  searches:
+    - name: service1
+      repositories:
+        - name: postgres
+          allowedServices:
+            - service1
+            - service2
+          allowedStatements:
+            - INSERT INTO users (name, age) VALUES (?, ?)
+        - name: mysql
+          allowedservices:
+            - service2
+            - service3
+          allowedStatements:
+            - INSERT INTO customers (name, address) VALUES (?, ?)
+        - name: mongodb
+          allowedServices:
+            - service3
+            - service5
+          allowedStatements:
+            - db.users.find()
+            - db.users.insert()
+      redis:
+        allowedFunctions:
+          - command: GET
+            childFunctions:
+              - GETBIT
+              - GETRANGE
+          - command: SET
+            childFunctions:
+              - SETEX
+              - SETNX
+          - command: INCR
+            childFunctions:
+              - INCRBY
+              - INCRBYFLOAT
+      kafka:
+        allowedTopics:
+          - topic: mytopic1
+            allowedOperations:
+              - READ
+              - WRITE
+          - topic: mytopic2
+            allowedOperations:
+              - READ
+              - WRITE
+      codeRules:
+        - language: java
+          allowedFunctions:
+            - com.example.myservice.UserService.createUser
+      protocolRules:
+        - protocol: http
+          allowedMethods:
+            - GET
+            - POST
+          allowedPathPrefixes:
+            - /api/v1/
+    - name: service2
+      repositories:
+        - name: mysql
+          allowedservices:
+            - service2
+            - service3
+            - service4
+          allowedStatements:
+            - INSERT INTO products (name, price) VALUES (?, ?)
+        - name: postgres
+          allowedservices:
+            - service1
+            - service2
+          allowedStatements:
+            - INSERT INTO users (name, age) VALUES (?, ?)
+        - name: redis
+          allowedservices:
+            - service1
+            - service2
+          allowedStatements:
+            - GET
+            - SET
+            - INCR
+        - name: kafka
+          allowedservices:
+            - service1
+            - service2
+          allowedTopics:
+            - topic: mytopic1
+              allowedOperations:
+                - READ
+                - WRITE
+            - topic: mytopic2
+              allowedOperations:
+                - READ
+                - WRITE
+      codeRules:
+        - language: go
+          allowedFunctions:
+            - myservice.CreateOrder
+            - myservice.UpdateOrder
+        - language: java
+          allowedFunctions:
+            - com.example.myservice.UserService.createUser
+            - com.example.myservice.OrderService.createOrder
+            - com.example.myservice.OrderService.updateOrder
+      protocolRules:
+        - protocol: http
+          allowedMethods:
+            - GET
+            - POST
+          allowedPathPrefixes:
+            - /api/v1/
+    - name: service3
+      repositories:
+        - name: mongodb
+          allowedservices:
+            - service3
+            - service5
+          allowedStatements:
+            - db.users.find()
+            - db.users.insert()
+        - name: mysql
+          allowedservices:
+            - service2
+            - service3
+           

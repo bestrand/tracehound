@@ -1,0 +1,124 @@
+# This definition also has a accesslist from a DB perspective
+kind: Search
+metadata:
+  name: services-search
+spec:
+  searches:
+    - name: service1
+      protocolRules:
+        - protocol: http
+          allowedMethods:
+            - GET
+            - POST
+          allowedPathPrefixes:
+            - /api/v1/
+        - protocol: kafka
+          allowedTopics:
+            - orders
+            - customers
+      codeRules:
+        - language: java
+          allowedFunctions:
+            - com.example.myservice.UserService.createUser
+      repositoryRules:
+        - dbType: postgresql
+          allowedStatements:
+            - INSERT INTO users (name, age) VALUES (?, ?)
+        - dbType: redis
+          allowedStatements:
+            - GET users
+            - SET users
+    - name: service2
+      protocolRules:
+        - protocol: grpc
+      codeRules:
+        - language: go
+          allowedFunctions:
+            - myservice.CreateOrder
+            - myservice.UpdateOrder
+      repositoryRules:
+        - dbType: mysql
+          allowedStatements:
+            - INSERT INTO customers (name, address) VALUES (?, ?)
+        - dbType: redis
+          allowedStatements:
+            - GET customers
+            - SET customers
+      messageBrokerRules:
+        - brokerType: kafka
+          allowedTopics:
+            - orders
+    - name: service3
+      protocolRules:
+        - protocol: http
+          allowedMethods:
+            - GET
+            - POST
+            - PUT
+          allowedPathPrefixes:
+            - /api/v1/
+        - protocol: redis
+          allowedCommands:
+            - GET
+            - SET
+      codeRules:
+        - language: java
+          allowedFunctions:
+            - com.example.myservice.OrderService.createOrder
+            - com.example.myservice.OrderService.updateOrder
+      repositoryRules:
+        - dbType: mongodb
+          allowedStatements:
+            - db.users.find()
+            - db.users.insert()
+        - dbType: redis
+          allowedStatements:
+            - GET orders
+            - SET orders
+      messageBrokerRules:
+        - brokerType: kafka
+          allowedTopics:
+            - orders
+            - customers
+  databases:
+    - name: postgres
+      services:
+        - service1
+        - service2
+      allowedStatements:
+        - service1:
+            - INSERT INTO users (name, age) VALUES (?, ?)
+        - service2:
+            - INSERT INTO customers (name, address) VALUES (?, ?)
+    - name: mysql
+      services:
+        - service2
+        - service5
+      allowedStatements:
+        - service2:
+            - INSERT INTO customers (name, address) VALUES (?, ?)
+        - service5:
+            - INSERT INTO orders (customer_id, product_id, quantity) VALUES (?, ?, ?)
+    - name: mongodb
+      services:
+        - service3
+      allowedStatements:
+        - service3:
+            - db.users.find()
+            - db.users.insert()
+    - name: redis
+      services:
+        - service1
+        - service2
+        - service3
+      allowedStatements:
+        - service1:
+            - GET users
+            - SET users
+        - service2:
+            - GET customers
+            - SET customers
+        - service3:
+            - GET orders
+            - SET orders
+

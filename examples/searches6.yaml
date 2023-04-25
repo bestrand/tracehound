@@ -1,0 +1,130 @@
+kind: Search
+metadata:
+  name: services-search
+spec:
+  searches:
+    databases:
+      - name: database1
+        allowedMicroservices:
+          - microservice1
+          - microservice2
+        allowedStatements:
+          microservice1:
+            - INSERT INTO users (name, age) VALUES (?, ?)
+          microservice2:
+            - INSERT INTO customers (name, address) VALUES (?, ?)
+      - name: database2
+        allowedMicroservices:
+          - microservice1
+          - microservice3
+        allowedStatements:
+          microservice1:
+            - INSERT INTO products (name, price) VALUES (?, ?)
+          microservice3:
+            - db.users.find()
+            - db.users.insert()
+      - name: database3
+        allowedMicroservices:
+          - microservice2
+          - microservice3
+        allowedStatements:
+          microservice2:
+            - INSERT INTO orders (customer_id, product_id, quantity) VALUES (?, ?, ?)
+          microservice3:
+            - db.orders.find()
+            - db.orders.insert()
+    microservices:
+      - name: microservice1
+        repositoryRules:
+          - language: java
+            allowedStatements:
+              - INSERT INTO users (name, age) VALUES (?, ?)
+          - language: python
+            allowedStatements:
+              - INSERT INTO users (name, age) VALUES (%s, %s)
+        protocolRules:
+          - protocol: http
+            allowedMethods:
+              - GET
+              - POST
+            allowedPathPrefixes:
+              - /api/v1/
+          - protocol: grpc
+            allowedMethods:
+              - GET
+              - PUT
+        messageBrokers:
+          - name: kafka
+            allowedTopics:
+              - orders
+          - name: rabbitmq
+            allowedTopics:
+              - users
+          redis:
+            allowedFunctions:
+              - SET
+              - GET
+            allowedChildFunctions:
+              SET:
+                - EX
+                - PX
+              GET:
+                - EX
+                - PX
+      - name: microservice2
+        repositoryRules:
+          - language: java
+            allowedStatements:
+              - INSERT INTO customers (name, address) VALUES (?, ?)
+          - language: go
+            allowedStatements:
+              - INSERT INTO customers (name, address) VALUES (?, ?)
+        protocolRules:
+          - protocol: http
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+            allowedPathPrefixes:
+              - /api/v1/
+          - protocol: grpc
+            allowedMethods:
+              - GET
+              - POST
+        remoteCache:
+          - name: redis
+            allowedFunctions:
+              - SET
+              - GET
+            allowedChildFunctions:
+              SET:
+                - EX
+                - PX
+              GET:
+                - EX
+                - PX
+      - name: microservice3
+        repositoryRules:
+          - language: java
+            allowedStatements:
+              - db.users.find()
+              - db.orders.insert()
+          - language: python
+            allowedStatements:
+              - db.orders.find()
+              - db.orders.insert()
+        protocolRules:
+          - protocol: http
+            allowedMethods:
+              - GET
+              - POST
+            allowedPathPrefixes:
+              - /api/v1/
+        messageBrokers:
+          - name: rabbitmq
+            allowedTopics:
+              - orders
+            allowedChildTopics:
+              orders:
+                - created
+                - updated

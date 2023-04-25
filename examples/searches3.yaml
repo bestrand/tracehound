@@ -1,0 +1,106 @@
+kind: Search
+metadata:
+  name: services-search
+spec:
+  searches:
+    - name: search_service1
+      repositoryRules:
+        - database: database1
+          allowedStatements:
+            - INSERT INTO users (name, age) VALUES (?, ?)
+        - database: database2
+          allowedStatements:
+            - INSERT INTO products (name, price) VALUES (?, ?)
+      protocolRules:
+        - protocol: http
+          allowedMethods:
+            - GET
+            - POST
+          allowedPathPrefixes:
+            - /api/v1/
+        - protocol: grpc
+          allowedMethods:
+            - GET
+            - PUT
+      codeRules:
+        - language: java
+          allowedFunctions:
+            - com.example.myservice.package1.Class1.function1
+            - com.example.myservice.package2.Class2.function2
+        - language: kotlin
+          allowedFunctions:
+            - com.example.myservice.package3.Class3.function3
+        - language: go
+          allowedFunctions:
+            - github.com/example/myservice/package4.Function4
+            - github.com/example/myservice/package5.Function5
+      remoteCache:
+        - name: redis
+          allowedFunctions:
+            - SET
+            - GET
+    - name: search_service2
+      repositoryRules:
+        - database: database1
+          allowedStatements:
+            - INSERT INTO users (name, age) VALUES (?, ?)
+        - database: database3
+          allowedStatements:
+            - INSERT INTO orders (customer_id, product_id, quantity) VALUES (?, ?, ?)
+      protocolRules:
+        - protocol: http
+          allowedMethods:
+            - GET
+            - POST
+            - PUT
+          allowedPathPrefixes:
+            - /api/v1/
+        - protocol: grpc
+          allowedMethods:
+            - GET
+            - POST
+      codeRules:
+        - language: java
+          allowedFunctions:
+            - com.example.myservice.package1.Class1.function1
+            - com.example.myservice.package2.Class2.function2
+        - language: go
+          allowedFunctions:
+            - github.com/example/myservice/package4.Function4
+            - github.com/example/myservice/package5.Function5
+      messageBrokers:
+        - name: rabbitmq
+          allowedTopics:
+            - orders
+          allowedChildTopics:
+            orders:
+              - created
+              - updated
+    - name: search_service3
+      repositoryRules:
+        - database: database2
+          allowedStatements:
+            - INSERT INTO products (name, price) VALUES (?, ?)
+        - database: database3
+          allowedStatements:
+            - db.orders.find()
+            - db.orders.insert()
+      protocolRules:
+        - protocol: http
+          allowedMethods:
+            - GET
+            - POST
+          allowedPathPrefixes:
+            - /api/v1/
+      remoteCache:
+        - name: redis
+          allowedFunctions:
+            - SET
+            - GET
+          allowedChildFunctions:
+            SET:
+              - EX
+              - PX
+            GET:
+              - EX
+              - PX
